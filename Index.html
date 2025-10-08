@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Tharparkar Cultural Journey - CesiumJS Animation</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <style>
+        html, body, #cesiumContainer {
+            width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+        }
+        /* Fullscreen and smooth transitions */
+        body { background: black; }
+    </style>
+</head>
+<body>
+    <div id="cesiumContainer"></div>
+    
+    <!-- Background Music: Calm and emotional track. Replace 'path/to/music.mp3' with a suitable free royalty-free audio file (e.g., from freesound.org or YouTube Audio Library). 
+         For example, search for "desert ambient calm" or "cultural ethnic flute". Autoplay may require user interaction in some browsers. -->
+    <audio id="backgroundMusic" loop>
+        <source src="path/to/your-calm-emotional-music.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        // Initialize Cesium Viewer
+        const viewer = new Cesium.Viewer('cesiumContainer', {
+            terrainProvider: Cesium.createWorldTerrain(), // Enable 3D terrain for realism
+            imageryProvider: new Cesium.OpenStreetMapImageryProvider({}), // Base map
+            baseLayerPicker: false, // Hide layer picker for clean cinematic view
+            geocoder: false,
+            homeButton: false,
+            sceneModePicker: false,
+            navigationHelpButton: false,
+            animation: false,
+            timeline: false,
+            fullscreenButton: false,
+            vrButton: false,
+            infoBox: false,
+            selectionIndicator: false
+        });
+
+        // Set initial full Earth view (from space)
+        viewer.camera.setView({
+            destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000), // 20,000 km altitude
+            orientation: {
+                heading: 0,
+                pitch: -0.5 * Math.PI / 2, // Look slightly down
+                roll: 0
+            }
+        });
+
+        // Tharparkar, Pakistan coordinates (center: approx 24.8°N, 69.8°E)
+        const tharparkarCenter = Cesium.Cartesian3.fromDegrees(69.8, 24.8, 1000); // 1km altitude for hover
+
+        // Animation duration (in seconds)
+        const zoomDuration = 15; // Slow zoom from space
+        const hoverDuration = 30; // Hover and tour sequence
+        const totalDuration = zoomDuration + hoverDuration;
+
+        // Start background music (may need user click in some browsers)
+        const music = document.getElementById('backgroundMusic');
+        music.volume = 0.3; // Soft volume
+        music.play().catch(e => console.log('Autoplay prevented; click to play music.'));
+
+        // Cultural Diversity Entities (Markers with images/text)
+        // These will be added after zoom-in. Use placeholder image URLs (replace with real ones, e.g., from Wikimedia or your assets).
+        // For short video clips: Cesium supports Html.createOpenStreetMapImageryProvider or custom billboards, but for simplicity, use images.
+        // Images represent: Culture (e.g., Sufi shrine), People (tribal portrait), Natural Beauty (desert landscape), Traditions (camel fair or embroidery).
+        const entities = viewer.entities.addAll([
+            // 1. Natural Beauty: Desert Dunes
+            {
+                position: Cesium.Cartesian3.fromDegrees(69.7, 24.9, 500),
+                point: { pixelSize: 10, color: Cesium.Color.YELLOW },
+                billboard: {
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Thar_Desert.jpg/320px-Thar_Desert.jpg', // Placeholder: Thar Desert image
+                    scale: 0.5,
+                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM
+                },
+                label: {
+                    text: 'Thar Desert Dunes\nVast golden sands, home to unique flora and fauna',
+                    font: '14pt sans-serif',
+                    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                    fillColor: Cesium.Color.WHITE,
+                    outlineColor: Cesium.Color.BLACK,
+                    outlineWidth: 2,
+                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                    pixelOffset: new Cesium.Cartesian2(0, -20)
+                },
+                description: '<p>Experience the endless beauty of the Thar Desert, a UNESCO-recognized biosphere reserve.</p>'
+            },
+            // 2. People: Tribal Communities
+            {
+                position: Cesium.Cartesian3.fromDegrees(70.0, 24.7, 500),
+                point: { pixelSize: 10, color: Cesium.Color.ORANGE },
+                billboard: {
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Sindhi_people.jpg/320px-Sindhi_people.jpg', // Placeholder: Sindhi tribal people
+                    scale: 0.5,
+                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM
+                },
+                label: {
+                    text: 'Thari People\nResilient communities of Hindus and Muslims',
+                    font: '14pt sans-serif',
+                    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                    fillColor: Cesium.Color.WHITE,
+                    outlineColor: Cesium.Color.BLACK,
+                    outlineWidth: 2,
+                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                    pixelOffset: new Cesium.Cartesian2(0, -20)
+                },
+                description: '<p>The diverse Thari tribes, known for their hospitality and pastoral lifestyle.</p>'
+            },
+            // 3. Culture: Sufi Shrines
+            {
+                position: Cesium.Cartesian3.fromDegrees(69.6, 24.6, 500),
+                point: { pixelSize: 10, color: Cesium.Color.BLUE },
+                billboard: {
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Shrine_in_Tharparkar.jpg/320px-Shrine_in_Tharparkar.jpg', // Placeholder: Local shrine (use actual if available)
+                    scale: 0.5,
+                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM
+                },
+                label: {
+                    text: 'Sufi Heritage\nAncient shrines and spiritual sites',
+                    font: '14pt sans-serif',
+                    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                    fillColor: Cesium.Color.WHITE,
+                    outlineColor: Cesium.Color.BLACK,
+                    outlineWidth: 2,
+                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                    pixelOffset: new Cesium.Cartesian2(0, -20)
+                },
+                description: '<p>Sites like the Shahbaz Qalandar shrine reflect the rich Sufi traditions blending faiths.</p>'
+            },
+            // 4. Traditions: Camel Fair / Embroidery
+            {
+                position: Cesium.Cartesian3.fromDegrees(69.9, 24.5, 500),
+                point: { pixelSize: 10, color: Cesium.Color.GREEN },
+                billboard: {
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Camel_fair_in_Tharparkar.jpg/320px-Camel_fair_in_Tharparkar.jpg', // Placeholder: Traditional camel or embroidery
+                    scale: 0.5,
+                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM
+                },
+                label: {
+                    text: 'Cultural Traditions\nCamel fairs and intricate embroidery',
+                    font: '14pt sans-serif',
+                    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                    fillColor: Cesium.Color.WHITE,
+                    outlineColor: Cesium.Color.BLACK,
+                    outlineWidth: 2,
+                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                    pixelOffset: new Cesium.Cartesian2(0, -20)
+                },
+                description: '<p>Annual fairs showcase Tharparkar\'s vibrant traditions, crafts, and folklore.</p>'
+            }
+        ]);
+
+        // Hide entities initially
+        entities.values.forEach(entity => {
+            entity.show = false;
+        });
+
+        // Smooth zoom animation using Cesium's flyTo (cinematic easing)
+        viewer.camera.flyTo({
+            destination: tharparkarCenter,
+            duration: zoomDuration,
+            easingFunction: Cesium.EasingFunction.LINEAR, // Or Cesium.EasingFunction.BOUNCE_IN_OUT for more cinematic feel
+            complete: function() {
+                // After zoom, show entities and start hover tour
+                entities.values.forEach(entity => {
+                    entity.show = true;
+                });
+
+                // Hover sequence: Slowly orbit/hover over markers (total 30s)
+                const startTime = Cesium.JulianDate.now();
+                const tourPositions = [
+                    { lon: 69.7, lat: 24.9, alt: 1500, duration: 7.5 }, // Dunes
+                    { lon: 70.0, lat: 24.7, alt: 1200, duration: 7.5 }, // People
+                    { lon: 69.6, lat: 24.6, alt: 1300, duration: 7.5 }, // Culture
+                    { lon: 69.9, lat: 24.5, alt: 1400, duration: 7.5 }  // Traditions
+                ];
+
+                let tourIndex = 0;
+                viewer.clock.onTick.addEventListener(function(clock) {
+                    const elapsed = Cesium.JulianDate.secondsDifference(clock.currentTime, startTime);
+                    if (elapsed > totalDuration) {
+                        // Loop the tour or stop
+                        viewer.clock.shouldAnimate = false;
+                        return;
+                    }
+
+                    if (tourIndex < tourPositions.length) {
+                        const pos = tourPositions[tourIndex];
+                        const targetTime = tourIndex * 7.5;
+                        if (elapsed >= targetTime && elapsed
