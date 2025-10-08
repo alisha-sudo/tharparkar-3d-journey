@@ -2,43 +2,79 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Tharparkar 3D Test</title>
+  <title>Tharparkar 3D Map</title>
+
+  <!-- ✅ CesiumJS CDN -->
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Cesium.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+
   <style>
     html, body, #cesiumContainer {
-      width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
       background: black;
+    }
+
+    /* Loading text */
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-family: sans-serif;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
   <div id="cesiumContainer"></div>
+  <div id="loading">🌍 Loading 3D Earth...</div>
 
   <script>
-    // 🚀 Basic Cesium setup (no token needed)
+    // Basic viewer without terrain (no token needed)
     const viewer = new Cesium.Viewer('cesiumContainer', {
-      terrainProvider: new Cesium.EllipsoidTerrainProvider(), // simple terrain (no token)
-      imageryProvider: new Cesium.OpenStreetMapImageryProvider(), // free map
-      baseLayerPicker: false
+      terrainProvider: new Cesium.EllipsoidTerrainProvider(),
+      imageryProvider: new Cesium.OpenStreetMapImageryProvider(),
+      baseLayerPicker: false,
+      animation: false,
+      timeline: false
     });
 
-    // 🌍 Zoom to Earth view
-    viewer.camera.setView({
-      destination: Cesium.Cartesian3.fromDegrees(69.8, 24.8, 3000000), // near Pakistan
-      orientation: {
-        heading: 0.0,
-        pitch: -0.5,
-        roll: 0.0
+    // Hide loading message when ready
+    viewer.scene.globe.tileLoadProgressEvent.addEventListener(function(remaining) {
+      if (remaining === 0) {
+        document.getElementById('loading').style.display = 'none';
       }
     });
 
-    // 🟢 Add a marker for Tharparkar
-    viewer.entities.add({
-      position: Cesium.Cartesian3.fromDegrees(69.8, 24.8),
-      point: { pixelSize: 10, color: Cesium.Color.YELLOW },
-      label: { text: "Tharparkar", font: "16px sans-serif", fillColor: Cesium.Color.WHITE }
+    // Camera start view (Earth)
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(0, 20, 20000000)
     });
+
+    // After 3 seconds, zoom to Tharparkar
+    setTimeout(() => {
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(69.8, 24.8, 3000000),
+        duration: 6
+      });
+
+      // Add Tharparkar marker
+      viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(69.8, 24.8),
+        point: { pixelSize: 10, color: Cesium.Color.YELLOW },
+        label: {
+          text: "Tharparkar",
+          font: "16px sans-serif",
+          fillColor: Cesium.Color.WHITE,
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM
+        }
+      });
+    }, 3000);
   </script>
 </body>
 </html>
