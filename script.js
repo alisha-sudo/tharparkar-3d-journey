@@ -1,3 +1,4 @@
+Cesium.Ion.defaultAccessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlMWI4OWFkZC1jYTFmLTQ0YmItYjY2MS1hNmNjMTQwZjI2YjEiLCJpZCI6MzQ4NDEzLCJpYXQiOjE3NTk5Mzc4OTl9.JQCIRBDvC2z9kNiThh-mog3sAMZ8Hbp116FlyUCv174
 // Initialize Cesium Viewer
 const viewer = new Cesium.Viewer("cesiumContainer", {
   terrainProvider: Cesium.createWorldTerrain(),
