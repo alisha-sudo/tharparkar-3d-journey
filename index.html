@@ -1,23 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Tharparkar Cultural Journey - 3D Cesium Animation</title>
-    <script src="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Cesium.js"></script>
-    <link href="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-    <link href="style.css" rel="stylesheet">
+  <meta charset="utf-8">
+  <title>Tharparkar 3D Test</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    html, body, #cesiumContainer {
+      width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+      background: black;
+    }
+  </style>
 </head>
 <body>
-    <div id="cesiumContainer"></div>
+  <div id="cesiumContainer"></div>
 
-    <!-- Background music -->
-    <audio id="backgroundMusic" loop>
-        <source src="music/calm-music.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
+  <script>
+    // 🚀 Basic Cesium setup (no token needed)
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      terrainProvider: new Cesium.EllipsoidTerrainProvider(), // simple terrain (no token)
+      imageryProvider: new Cesium.OpenStreetMapImageryProvider(), // free map
+      baseLayerPicker: false
+    });
 
-    <div id="title">🌍 Tharparkar: A Cultural Journey</div>
+    // 🌍 Zoom to Earth view
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(69.8, 24.8, 3000000), // near Pakistan
+      orientation: {
+        heading: 0.0,
+        pitch: -0.5,
+        roll: 0.0
+      }
+    });
 
-    <script src="script.js"></script>
+    // 🟢 Add a marker for Tharparkar
+    viewer.entities.add({
+      position: Cesium.Cartesian3.fromDegrees(69.8, 24.8),
+      point: { pixelSize: 10, color: Cesium.Color.YELLOW },
+      label: { text: "Tharparkar", font: "16px sans-serif", fillColor: Cesium.Color.WHITE }
+    });
+  </script>
 </body>
 </html>
